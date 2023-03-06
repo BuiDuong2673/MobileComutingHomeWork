@@ -1,6 +1,7 @@
 package com.codemave.mobilecomputing.ui.reminder
 
 import android.icu.text.SimpleDateFormat
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,10 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codemave.mobilecomputing.Graph
 import com.codemave.mobilecomputing.ui.login.getProfile
 import com.codemave.mobilecomputing.ui.signup.SignUpViewModel
 import com.google.accompanist.insets.systemBarsPadding
@@ -26,6 +29,7 @@ import com.codemave.mobilecomputing.data.entity.Category
 import kotlinx.coroutines.launch
 import java.util.*
 import com.codemave.mobilecomputing.data.entity.Reminder
+import com.codemave.mobilecomputing.ui.theme.Green
 
 @Composable
 fun Reminder (
@@ -45,6 +49,7 @@ fun Reminder (
     val remindMin = rememberSaveable{ mutableStateOf("") }
     val timeSystem = rememberSaveable{ mutableStateOf("") }
     val reminderMessage = rememberSaveable{ mutableStateOf("") }
+    val sendNotification = rememberSaveable { mutableStateOf(true)}
     // for the creator information
     val viewModelSignUp: SignUpViewModel = viewModel()
     val viewStateSignUp by viewModelSignUp.state.collectAsState()
@@ -53,14 +58,23 @@ fun Reminder (
         Column(modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()) {
-            TopAppBar {
+            TopAppBar  {
                 IconButton(onClick = onBackPress) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }
-                Text(text = "Add Reminder")
+                Text(text = "Add Reminder", modifier = Modifier.padding(start = 4.dp))
+                Switch(
+                    checked = sendNotification.value,
+                    onCheckedChange = { sendNotification.value = it },
+                    modifier = Modifier.padding(start = 180.dp),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.Green,
+                        checkedTrackColor = Green
+                    )
+                )
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -172,7 +186,7 @@ fun Reminder (
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
-                        if (category.value.isNotEmpty()) {
+                        if (title.value != "" && category.value.isNotEmpty() && remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
                             coroutineScope.launch {
                                 viewModel.saveReminder(
                                     Reminder(
@@ -181,15 +195,20 @@ fun Reminder (
                                         creatorId = getCreatorId(viewStateSignUp.accounts, creator.value),
                                         reminderTime = dateToString(remindDay.value, remindMonth.value, remindYear.value, remindHour.value, remindMin.value, timeSystem.value),
                                         creationTime = getCurrentTime(),//currentTimeInMillis.toDateTimeString(),
-                                        reminderMessage = reminderMessage.value
+                                        reminderMessage = reminderMessage.value,
+                                        sendNotification = sendNotification.value
                                     )
                                 )
                             }
+                            onBackPress()
+                        } else {
+                            Toast.makeText(Graph.appContext, "Please enter all of the value to save the reminder", Toast.LENGTH_LONG).show()
                         }
-                        onBackPress()
                     },
                     enabled = true,
-                    modifier = Modifier.fillMaxWidth().size(55.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(55.dp)
                 ) {
                     Text("Save Reminder")
                 }

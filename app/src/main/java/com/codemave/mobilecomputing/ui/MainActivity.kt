@@ -13,6 +13,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.codemave.mobilecomputing.data.entity.Reminder
+import com.codemave.mobilecomputing.ui.home.categoryReminder.getReminder
 import com.codemave.mobilecomputing.ui.theme.Homework3Theme
 
 class MainActivity : ComponentActivity() {
@@ -30,6 +32,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     class BackgroundTask : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action.equals("trigger_toast")) {

@@ -1,5 +1,6 @@
 package com.codemave.mobilecomputing.ui.signup
 
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codemave.mobilecomputing.Graph
@@ -17,7 +18,7 @@ class SignUpViewModel (
     val state: StateFlow<SignUpViewState>
         get() = _state
 
-    suspend fun saveAccount(account: com.codemave.mobilecomputing.data.entity.Account): Long {
+    suspend fun saveAccount(account: Account): Long {
         return if (account.name != account.password) {
             accountRepository.addAccount(account)
         } else {

@@ -38,5 +38,5 @@ data class Reminder (
     @ColumnInfo(name = "creation_time") val creationTime: String,
     @ColumnInfo(name = "reminder_message") val reminderMessage: String,
     @ColumnInfo(name = "reminder_seen") var reminderSeen: Boolean = false,
-    @ColumnInfo(name = "is_previous") var isPrevious: Boolean = false
+    @ColumnInfo(name = "send_notification") var sendNotification: Boolean = true
 )

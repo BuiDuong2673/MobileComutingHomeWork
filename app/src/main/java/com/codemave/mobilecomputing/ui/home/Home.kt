@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -141,7 +142,7 @@ private fun CategoryTabs(
         edgePadding = 24.dp,
         indicator = emptyTabIndicator,
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = MaterialTheme.colors.primary.copy(0.3f)
+        backgroundColor = Color.White//MaterialTheme.colors.primary.copy(0.5f)
     ) {
         categories.forEachIndexed { index, category ->
             Tab(
@@ -157,42 +158,44 @@ private fun CategoryTabs(
         }
     }
 }
-/*
-@Composable
-private fun TimeTabs(
-    selectedTab: String
-) {
-    val options = listOf("Previous", "Show All")
-    var selectedTabIndex by remember { mutableStateOf(0)}
-    TabRow(
-        selectedTabIndex = selectedTabIndex
-    ) {
-        options.forEachIndexed { index, title ->
-            Tab(
-                selected = selectedTabIndex == index,
-                onClick = { selectedTabIndex = index },
-                text = {Text(title)}
-            )
-        }
-    }
-}*/
 
+/**
+ * Show 2 options for user
+ * Main: See only the reminders that have already happened
+ * Show All: See all the reminders (both happend or not)
+ */
 @Composable
 private fun TimeTabs(
     categoryId: Long,
     navController: NavController
 ) {
     var selectedTabIndex by remember { mutableStateOf(0)}
-    TabRow(selectedTabIndex = selectedTabIndex) {
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        backgroundColor = Color.White
+    ) {
         Tab(
-            text = {Text("Main")},
             selected = selectedTabIndex == 0,
-            onClick = { selectedTabIndex = 0 }
+            onClick = { selectedTabIndex = 0 },
+            text = {
+                Text(
+                    text = "Main",
+                    fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal
+                )
+            },
+            selectedContentColor = MaterialTheme.colors.primary,
+            unselectedContentColor = Color.Black
         )
         Tab(
-            text = {Text("Show All")},
             selected = selectedTabIndex == 1,
-            onClick = { selectedTabIndex = 1 }
+            onClick = { selectedTabIndex = 1 },
+            text = {
+                Text(
+                    text ="Show All",
+                    fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal
+                )},
+            selectedContentColor = MaterialTheme.colors.primary,
+            unselectedContentColor = Color.Black
         )
     }
     when (selectedTabIndex) {

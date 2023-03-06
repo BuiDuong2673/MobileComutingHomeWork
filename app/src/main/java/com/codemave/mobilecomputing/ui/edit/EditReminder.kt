@@ -2,6 +2,7 @@ package com.codemave.mobilecomputing.ui.edit
 
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.input.KeyboardType
@@ -18,6 +20,7 @@ import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codemave.mobilecomputing.Graph
 import com.codemave.mobilecomputing.data.entity.Category
 import com.codemave.mobilecomputing.ui.home.categoryReminder.getCategory
 import com.codemave.mobilecomputing.ui.home.categoryReminder.getReminder
@@ -28,6 +31,7 @@ import com.codemave.mobilecomputing.R
 import com.codemave.mobilecomputing.data.entity.Reminder
 import com.codemave.mobilecomputing.ui.home.categoryReminder.setReminder
 import com.codemave.mobilecomputing.ui.reminder.*
+import com.codemave.mobilecomputing.ui.theme.Green
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,7 +62,7 @@ fun EditReminder (
 
     val createTime = rememberSaveable { mutableStateOf(reminder.creationTime) }
     val reminderMessage = rememberSaveable { mutableStateOf(reminder.reminderMessage) }
-
+    val sendNotification = rememberSaveable { mutableStateOf(reminder.sendNotification)}
     Surface {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -71,6 +75,15 @@ fun EditReminder (
                     )
                 }
                 Text(text = "Reminder")
+                Switch(
+                    checked = sendNotification.value,
+                    onCheckedChange = { sendNotification.value = it },
+                    modifier = Modifier.padding(start = 180.dp),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.Green,
+                        checkedTrackColor = Green
+                    )
+                )
             }
 
             Column(
@@ -190,12 +203,12 @@ fun EditReminder (
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
-                    enabled = true,
                     onClick = {
                         if ((title.value != reminder.reminderTitle)
-                            || (category.value != "${reminder.reminderCategoryId}")
+                            || (getCategoryId(viewState.categories, category.value) != reminder.reminderCategoryId)
                             || newRemindTime != reminder.reminderTime
                             || reminderMessage.value != reminder.reminderMessage
+                            || sendNotification.value != reminder.sendNotification
                         ) {
                             val editedReminder = Reminder(
                                 reminderId = reminder.reminderId,
@@ -207,18 +220,21 @@ fun EditReminder (
                                 creatorId = user.id,
                                 reminderTime = newRemindTime,
                                 creationTime = reminder.creationTime,
-                                reminderMessage = reminderMessage.value
+                                reminderMessage = reminderMessage.value,
+                                sendNotification = sendNotification.value
                             )
                             coroutineScope.launch {
                                 viewModel.editReminder(
                                     editedReminder
                                 )
                                 setReminder(editedReminder)
-                                navController.navigate("home")
                             }
                             onBackPress()
+                        } else {
+                            Toast.makeText(Graph.appContext, "Please modify some value or press Back button if you do not want to change.", Toast.LENGTH_LONG).show()
                         }
                     },
+                    enabled = true,
                     modifier = Modifier.fillMaxWidth().size(55.dp)
                 ) {
                     Text("Save Reminder")

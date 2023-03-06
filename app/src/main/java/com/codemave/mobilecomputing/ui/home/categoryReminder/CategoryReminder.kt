@@ -47,15 +47,18 @@ fun CategoryReminder (
     val viewState by viewModel.state.collectAsState()
 
     Column(modifier = modifier) {
-        ReminderList(
+        ReminderListPrevious(
             list = viewState.reminders,
             navController = navController
         )
     }
 }
 
+/**
+ * List all the reminders that happened in the PAST
+ */
 @Composable
-private fun ReminderList (
+private fun ReminderListPrevious (
     list: List<ReminderToCategory>,
     navController: NavController
 ) {
@@ -76,7 +79,6 @@ private fun ReminderList (
         }
     }
 }
-
 /**
  * Make the list of all reminder in the home screen
  */
@@ -226,7 +228,7 @@ private fun ReminderListItem(
             onClick = { 
                 reminder.reminderSeen = !reminder.reminderSeen
                 checkTint = if (reminder.reminderSeen) {
-                    Color.Green
+                    Color(0xFF008000)
                 } else {
                     Color.Black
                 }
@@ -276,7 +278,7 @@ private fun ReminderListItem(
                IconButton(
                    onClick = {
                        setReminder(reminder)
-                       setCategory(category) //TODO
+                       setCategory(category) //TODO how to get the category from reminder_category_id
                        navController.navigate(route = "edit")
                    },
                    modifier = Modifier
@@ -301,7 +303,7 @@ fun setReminder(reminder: Reminder) {
 fun getReminder(): Reminder {
     return aReminder
 }
-//TODO
+//TODO how to get category from reminder_category_id
 var aCategory: Category = Category(name = "Food")
 fun setCategory(category: Category) {
     aCategory = category

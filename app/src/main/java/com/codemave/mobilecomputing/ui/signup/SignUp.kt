@@ -1,5 +1,6 @@
 package com.codemave.mobilecomputing.ui.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codemave.mobilecomputing.Graph
 import com.codemave.mobilecomputing.data.entity.Account
 import com.google.accompanist.insets.systemBarsPadding
 import kotlinx.coroutines.launch
@@ -74,8 +76,14 @@ fun SignUp(
                                 password = password.value
                             )
                         )
-                        if (username.value != password.value) {
-                            navController.navigate("login")
+                        if (username.value != "" && password.value != "") {
+                            if (username.value != password.value) {
+                                navController.navigate("login")
+                            } else {
+                                Toast.makeText(Graph.appContext, "Username and Password must be different!", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            Toast.makeText(Graph.appContext, "Please enter all the value to Sign Up.", Toast.LENGTH_SHORT).show()
                         }
                     }
                 },

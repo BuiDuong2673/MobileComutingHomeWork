@@ -1,5 +1,7 @@
 package com.codemave.mobilecomputing.ui.login
 
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.codemave.mobilecomputing.ui.signup.SignUpViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codemave.mobilecomputing.Graph
 import com.google.accompanist.insets.systemBarsPadding
 import com.codemave.mobilecomputing.R
 import com.codemave.mobilecomputing.data.entity.Account
@@ -77,6 +80,8 @@ fun LogIn(
                     if (viewState.accounts.isNotEmpty() && account != null) {
                         setProfile(account)
                         navController.navigate("home")
+                    } else {
+                        Toast.makeText(Graph.appContext, "Please enter the correct Username and Password to log in", Toast.LENGTH_LONG).show()
                     }
                 },
                 enabled = true,
@@ -92,7 +97,6 @@ fun LogIn(
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            /*TODO: make the toast"*/
             Text(
                 text = "Don't have account?",
                 fontWeight = FontWeight.Bold,
@@ -101,7 +105,7 @@ fun LogIn(
             Button(
                 onClick =  { navController.navigate("signup") },
                 enabled = true,
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent)
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
             ) {
                 Text(
                     text = "Sign Up",

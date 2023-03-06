@@ -16,6 +16,12 @@ class ReminderRepository (
         return reminderDao.reminderFromCategory(categoryId)
     }
     /**
+     * Get reminder with the given reminderId
+     */
+    fun getReminderWithId(reminderId: Long): Reminder? {
+        return reminderDao.reminder(reminderId)
+    }
+    /**
      * Add a new [Reminder] to the reminder store
      */
     suspend fun addReminder(reminder: Reminder) = reminderDao.insert(reminder)
