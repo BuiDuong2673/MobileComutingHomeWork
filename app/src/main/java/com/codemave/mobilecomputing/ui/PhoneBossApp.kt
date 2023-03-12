@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.codemave.mobilecomputing.ui.edit.EditReminder
 import com.codemave.mobilecomputing.ui.home.Home
 import com.codemave.mobilecomputing.ui.login.LogIn
+import com.codemave.mobilecomputing.ui.map.ReminderLocationMap
 import com.codemave.mobilecomputing.ui.profile.Profile
 import com.codemave.mobilecomputing.ui.reminder.Reminder
 import com.codemave.mobilecomputing.ui.signup.SignUp
@@ -36,7 +37,7 @@ fun PhoneBossApp (
         }
 
         composable(route = "reminder") {
-            Reminder(onBackPress = appState::navigateBack)
+            Reminder(onBackPress = appState::navigateBack, navController = appState.navController)
         }
 
         composable(route = "edit") {
@@ -45,6 +46,10 @@ fun PhoneBossApp (
 
         composable(route = "profile") {
             Profile(navController = appState.navController, onBackPress = appState::navigateBack)
+        }
+
+        composable(route = "map") {
+            ReminderLocationMap(navController = appState.navController)
         }
     }
 }

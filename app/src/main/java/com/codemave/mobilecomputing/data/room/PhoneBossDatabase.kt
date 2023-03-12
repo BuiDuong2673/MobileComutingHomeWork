@@ -11,7 +11,7 @@ import com.codemave.mobilecomputing.data.entity.Reminder
  */
 @Database(
     entities = [Category::class, Reminder::class, Account::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 

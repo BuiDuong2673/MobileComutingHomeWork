@@ -1,7 +1,15 @@
 package com.codemave.mobilecomputing.ui.reminder
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,10 +23,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.codemave.mobilecomputing.Graph
 import com.codemave.mobilecomputing.ui.login.getProfile
 import com.codemave.mobilecomputing.ui.signup.SignUpViewModel
@@ -30,11 +43,13 @@ import kotlinx.coroutines.launch
 import java.util.*
 import com.codemave.mobilecomputing.data.entity.Reminder
 import com.codemave.mobilecomputing.ui.theme.Green
+import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun Reminder (
     onBackPress: () -> Unit,
-    viewModel: ReminderViewModel = viewModel()
+    viewModel: ReminderViewModel = viewModel(),
+    navController: NavController
 ) {
     val viewState by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -50,6 +65,21 @@ fun Reminder (
     val timeSystem = rememberSaveable{ mutableStateOf("") }
     val reminderMessage = rememberSaveable{ mutableStateOf("") }
     val sendNotification = rememberSaveable { mutableStateOf(true)}
+
+    //location
+    // get the data from the long click location
+    val latlng = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("location_data")
+        ?.value
+    // for permission request activity
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {}
+    )
+
+    val context = LocalContext.current
     // for the creator information
     val viewModelSignUp: SignUpViewModel = viewModel()
     val viewStateSignUp by viewModelSignUp.state.collectAsState()
@@ -90,16 +120,66 @@ fun Reminder (
                 Spacer(modifier = Modifier.height(10.dp))
                 CategoryListDropDown(
                     viewState = viewState,
-                    category = category
+                    category = category,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     value = creator.value,
                     onValueChange = {creator.value = it},
-                    label = {Text(text = "Creator Name")},
+                    label = { Text (text = "Creator Name")},
                     modifier = Modifier.fillMaxWidth(),
                     enabled = false
                 )
+                Spacer (modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    //TODO make this button in the equal row with Latitude and Longitude
+                    OutlinedButton(
+                        //onClick = {navController.navigate("map")},
+                        onClick = {
+                            requestPermission(
+                                context = context,
+                                permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                                requestPermission = {launcher.launch (Manifest.permission.ACCESS_FINE_LOCATION)}
+                            ).apply {
+                                navController.navigate("map")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(fraction = 0.35f)
+                    ) {
+                        Text(text = "Reminder Location", textAlign = TextAlign.Center)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = if (latlng == null) {
+                                    ""
+                                } else {
+                                    String.format(Locale.getDefault(),
+                                    "%1$.2f",
+                                    latlng.latitude)
+                                },
+                        onValueChange = {},
+                        label = { Text(text = "Latitude", textAlign = TextAlign.Center)},
+                        modifier = Modifier.fillMaxWidth(fraction = 0.5f),//fraction is the ratio of the space compare with max width of the left elements in the row
+                        enabled = false
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = if (latlng == null) {
+                                    ""
+                                } else {
+                                       String.format(Locale.getDefault(),
+                                       "%1$.2f",
+                                       latlng.longitude)
+                               },
+                        onValueChange = {},
+                        label = { Text (text = "Longitude", textAlign = TextAlign.Center)},
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Choose the remind date",
@@ -188,11 +268,20 @@ fun Reminder (
                     onClick = {
                         if (title.value != "" && category.value.isNotEmpty() && remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
                             coroutineScope.launch {
+                                if (Build.VERSION.SDK_INT >= 33) {
+                                    requestPermission(
+                                        context = context,
+                                        permission = Manifest.permission.ACCESS_NOTIFICATION_POLICY,
+                                        requestPermission = {launcher.launch (Manifest.permission.ACCESS_NOTIFICATION_POLICY)}
+                                    )
+                                }
                                 viewModel.saveReminder(
                                     Reminder(
                                         reminderTitle = title.value,
                                         reminderCategoryId = getCategoryId(viewState.categories, category.value),
                                         creatorId = getCreatorId(viewStateSignUp.accounts, creator.value),
+                                        locationX = latlng?.latitude?:65.06,
+                                        locationY = latlng?.longitude?:25.47,
                                         reminderTime = dateToString(remindDay.value, remindMonth.value, remindYear.value, remindHour.value, remindMin.value, timeSystem.value),
                                         creationTime = getCurrentTime(),//currentTimeInMillis.toDateTimeString(),
                                         reminderMessage = reminderMessage.value,
@@ -220,7 +309,8 @@ fun Reminder (
 @Composable
 fun CategoryListDropDown(
     viewState: ReminderViewState,
-    category: MutableState<String>
+    category: MutableState<String>,
+    modifier: Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
     val icon = if (expanded) {
@@ -228,7 +318,7 @@ fun CategoryListDropDown(
     } else {
         Icons.Filled.ArrowDropDown
     }
-    Column {
+    Column (modifier = modifier) {
         OutlinedTextField(
             value = category.value,
             onValueChange = {category.value = it},
@@ -458,6 +548,9 @@ fun getCurrentTime(): String {
     return dateFormat.format(Date(System.currentTimeMillis()))
 }
 
+/**
+ * Check if it is a previous reminder or upcoming reminder
+ */
 fun isPrevious(timeString: String): Boolean {
     val dateFormat = SimpleDateFormat("MMMM dd, yyyy hh:mm a", Locale.getDefault())
     val date = dateFormat.parse(timeString)
@@ -474,4 +567,14 @@ fun getCategoryId(categories: List<Category>, categoryName: String): Long {
 fun getCreatorId(accounts: List<Account>, userName: String): Long {
     val account: Account? = accounts.first { account -> account.name == userName}
     return account?.id?:-1
+}
+
+fun requestPermission(
+    context: Context,
+    permission: String,
+    requestPermission: () -> Unit
+) {
+    if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+        requestPermission()
+    }
 }

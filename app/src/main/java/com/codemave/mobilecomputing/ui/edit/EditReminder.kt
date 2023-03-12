@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -32,6 +33,7 @@ import com.codemave.mobilecomputing.data.entity.Reminder
 import com.codemave.mobilecomputing.ui.home.categoryReminder.setReminder
 import com.codemave.mobilecomputing.ui.reminder.*
 import com.codemave.mobilecomputing.ui.theme.Green
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,6 +65,18 @@ fun EditReminder (
     val createTime = rememberSaveable { mutableStateOf(reminder.creationTime) }
     val reminderMessage = rememberSaveable { mutableStateOf(reminder.reminderMessage) }
     val sendNotification = rememberSaveable { mutableStateOf(reminder.sendNotification)}
+
+    //location
+    val locationX = rememberSaveable { mutableStateOf(reminder.locationX)}
+    val locationY = rememberSaveable { mutableStateOf(reminder.locationY)}
+
+    // get the dat from the long click location
+    val latlng = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("location_data")
+        ?.value
+
     Surface {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -98,18 +112,68 @@ fun EditReminder (
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                CategoryListDropDown(
-                    viewState = viewState,
-                    category = category
-                )
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    CategoryListDropDown(
+                        viewState = viewState,
+                        category = category,
+                        modifier = Modifier.fillMaxWidth(fraction = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = creator.value,
+                        onValueChange = {creator.value = it},
+                        label = {Text(text = "Creator Name")},
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = creator.value,
-                    onValueChange = {creator.value = it},
-                    label = {Text(text = "Creator Name")},
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = false
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = {navController.navigate("map") },
+                        modifier = Modifier.fillMaxWidth(fraction = 0.35f)
+                    ) {
+                        Text(text = "Reminder Location", textAlign = TextAlign.Center)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = if (latlng == null) {
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%1$.2f",
+                                        reminder.locationX
+                                    )
+                                } else {
+                                       String.format(Locale.getDefault(),
+                                       "%1$.2f",
+                                       latlng.latitude)
+                                },
+                        onValueChange = {},
+                        label = {Text(text = "Latitude", textAlign = TextAlign.Center)},
+                        modifier = Modifier.fillMaxWidth(fraction = 0.5f),
+                        enabled = false
+                    )
+                    Spacer (modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = if (latlng == null) {
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%1$.2f",
+                                        reminder.locationY
+                                    )
+                                } else {
+                                    String.format(Locale.getDefault(),
+                                    "%1$.2f",
+                                    latlng.longitude)
+                                },
+                        onValueChange = {},
+                        label = {Text(text = "Longitude", textAlign = TextAlign.Center)},
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Remind Date",
@@ -209,6 +273,7 @@ fun EditReminder (
                             || newRemindTime != reminder.reminderTime
                             || reminderMessage.value != reminder.reminderMessage
                             || sendNotification.value != reminder.sendNotification
+                            || latlng != null
                         ) {
                             val editedReminder = Reminder(
                                 reminderId = reminder.reminderId,
@@ -218,6 +283,8 @@ fun EditReminder (
                                     category.value
                                 ),
                                 creatorId = user.id,
+                                locationX = latlng?.latitude?: reminder.locationX,
+                                locationY = latlng?.longitude?: reminder.locationY,
                                 reminderTime = newRemindTime,
                                 creationTime = reminder.creationTime,
                                 reminderMessage = reminderMessage.value,
@@ -235,7 +302,9 @@ fun EditReminder (
                         }
                     },
                     enabled = true,
-                    modifier = Modifier.fillMaxWidth().size(55.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(55.dp)
                 ) {
                     Text("Save Reminder")
                 }

@@ -32,11 +32,12 @@ data class Reminder (
     @ColumnInfo(name = "reminder_title") val reminderTitle: String,
     @ColumnInfo(name = "reminder_category_id") val reminderCategoryId: Long,
     @ColumnInfo(name = "creator_id") val creatorId: Long,
-    @ColumnInfo(name = "location_x") val locationX: Double = 90.0,
-    @ColumnInfo(name = "location_y") val locationY: Double = 90.0,
+    @ColumnInfo(name = "location_x") val locationX: Double = 65.06,
+    @ColumnInfo(name = "location_y") val locationY: Double = 25.47,
     @ColumnInfo(name = "reminder_time") val reminderTime: String,
     @ColumnInfo(name = "creation_time") val creationTime: String,
     @ColumnInfo(name = "reminder_message") val reminderMessage: String,
     @ColumnInfo(name = "reminder_seen") var reminderSeen: Boolean = false,
-    @ColumnInfo(name = "send_notification") var sendNotification: Boolean = true
+    @ColumnInfo(name = "send_notification") var sendNotification: Boolean = true,
+    @ColumnInfo(name = "is_near") var isNear: Boolean = false
 )

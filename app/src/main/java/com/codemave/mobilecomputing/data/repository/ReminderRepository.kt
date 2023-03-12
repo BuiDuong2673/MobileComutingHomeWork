@@ -16,6 +16,10 @@ class ReminderRepository (
         return reminderDao.reminderFromCategory(categoryId)
     }
     /**
+     * Get the list of reminders
+     */
+    fun reminders(): Flow<List<Reminder>> = reminderDao.reminders()
+    /**
      * Get reminder with the given reminderId
      */
     fun getReminderWithId(reminderId: Long): Reminder? {

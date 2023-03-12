@@ -1,16 +1,25 @@
 package com.codemave.mobilecomputing.ui.reminder
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.location.Location
+import android.location.Location.distanceBetween
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
+import android.os.Looper
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.Color
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -24,11 +33,15 @@ import com.codemave.mobilecomputing.data.entity.Reminder
 import com.codemave.mobilecomputing.data.repository.CategoryRepository
 import com.codemave.mobilecomputing.data.repository.ReminderRepository
 import com.codemave.mobilecomputing.util.NotificationWorker
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
+import androidx.core.app.NotificationManagerCompat.from
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.flow.update
 
 class ReminderViewModel (
     private val reminderRepository: ReminderRepository = Graph.reminderRepository,
@@ -67,7 +80,6 @@ class ReminderViewModel (
     init {
         viewModelScope.launch {
             createNotificationChannel(context = Graph.appContext)
-            setRecurringReminder()
             categoryRepository.categories().collect { categories ->
                 _state.value = ReminderViewState(categories)
             }
@@ -262,6 +274,23 @@ private fun calculateTimeDelay(dateString: String): Long {
     return date.time - System.currentTimeMillis()
 }
 
+/**
+ * Notification when user location is near the reminder location
+ */
+fun reminderIsNearNotification(reminder: Reminder) {
+    val notificationId = 7
+    val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
+        .setSmallIcon(R.drawable.ic_success_noti)
+        .setContentTitle("You are near the reminder location")
+        .setContentText("You are currently near to the reminder ${reminder.reminderTitle}'s location.")
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+    with (NotificationManagerCompat.from(Graph.appContext)) {
+        notify (notificationId, builder.build())
+    }
+}
+
+
 data class ReminderViewState(
-    val categories: List<Category> = emptyList()
+    val categories: List<Category> = emptyList(),
+    val reminders: List<Reminder> = emptyList()
 )

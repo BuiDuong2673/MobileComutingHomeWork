@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.codemave.mobilecomputing">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
     <application
         android:name =".PhoneBossApplication"
         android:allowBackup="true"
@@ -13,6 +17,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Homework3"
         tools:targetApi="31">
+
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBxra_DXTnoTjxhJBDw6RU_ofT5iHo-cjc"/>
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"

@@ -21,6 +21,9 @@ abstract class ReminderDao {
     @Query("""SELECT * FROM reminders WHERE id = :reminderId""")
     abstract fun reminder(reminderId: Long): Reminder?
 
+    @Query("SELECT * FROM reminders")
+    abstract fun reminders(): Flow<List<Reminder>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(entity: Reminder): Long
 

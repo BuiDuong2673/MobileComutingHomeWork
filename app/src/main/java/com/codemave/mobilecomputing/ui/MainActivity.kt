@@ -16,6 +16,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.codemave.mobilecomputing.data.entity.Reminder
 import com.codemave.mobilecomputing.ui.home.categoryReminder.getReminder
 import com.codemave.mobilecomputing.ui.theme.Homework3Theme
+import com.google.android.gms.common.util.MapUtils
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
