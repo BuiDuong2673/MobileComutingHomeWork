@@ -46,7 +46,6 @@ class ReminderViewModel (
             0
         } else {
             createReminderMadeNotification(reminder)
-            //updateUserLocation(reminder)
             if (reminder.sendNotification) {
                 setReminderTimeNotification(reminder)
             }
@@ -85,16 +84,6 @@ class ReminderViewModel (
                 _state.value = ReminderViewState(categories)
             }
         }
-    }
-}
-
-/**
- * Send the notification if the reminder location is near the user location
- */
-fun reminderIsNear(reminder: Reminder, userLocation: Location) {
-    val reminderLocation = LatLng(reminder.locationX, reminder.locationY)
-    if (isLocationNear(reminderLocation, LatLng(userLocation.latitude, userLocation.longitude))) {
-        reminderIsNearNotification(reminder)
     }
 }
 
@@ -295,7 +284,7 @@ fun reminderIsNearNotification(reminder: Reminder) {
  * Calculate the time to send reminder notification
  */
 private fun calculateTimeDelay(dateString: String): Long {
-    val format = SimpleDateFormat("MMMM dd, yyyy hh:mm a", Locale.ENGLISH)
+    val format = SimpleDateFormat("MMMM dd, yyyy hh:mm a", Locale.getDefault())
     val date = format.parse(dateString)
     return date.time - System.currentTimeMillis()
 }

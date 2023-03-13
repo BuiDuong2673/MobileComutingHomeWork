@@ -29,8 +29,10 @@ import com.google.maps.android.ktx.awaitMap
 import kotlinx.coroutines.launch
 import java.util.*
 import com.codemave.mobilecomputing.ui.MainActivity
+import com.codemave.mobilecomputing.ui.reminder.getUserLocation
 import com.codemave.mobilecomputing.ui.reminder.reminderIsNear
 import com.codemave.mobilecomputing.ui.reminder.reminderIsNearNotification
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
 @Composable
 fun ReminderLocationMap(
@@ -52,19 +54,21 @@ fun ReminderLocationMap(
                 val map = mapView.awaitMap()
                 map.uiSettings.isZoomControlsEnabled = true
                 map.uiSettings.isScrollGesturesEnabled = true
-                val location = LatLng(65.06, 25.47) // latitude and longitude of the University of Oulu TODO make the variable of this coordinate
+                val location = LatLng(getUserLocation().latitude, getUserLocation().longitude) // latitude and longitude of the University of Oulu TODO make the variable of this coordinate
                 //val location = LatLng(latitude, longitude)
+
                 map.moveCamera(
                     //CameraUpdateFactory.newLatLngZoom(location, 10f)
                     CameraUpdateFactory.newLatLngZoom(
-                        LatLng (location.latitude, location.longitude),
+                        LatLng(location.latitude, location.longitude),
                         10f
                     )
                 )
-
+                val blueMarkerIcon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                 val markerOptions = MarkerOptions()
                     .title ("Welcome to the University of Oulu!")
                     .position(location)
+                    .icon(blueMarkerIcon)
                 map.addMarker(markerOptions)
 
                 setMapLongClick(map = map, navController = navController, reminders = viewState.reminders)

@@ -60,8 +60,6 @@ fun EditReminder (
     val remindHour = rememberSaveable { mutableStateOf(remindTime[3]) }
     val remindMin= rememberSaveable { mutableStateOf(remindTime[4]) }
     val timeSystem = rememberSaveable { mutableStateOf(remindTime[5]) }
-    val newRemindTime = dateToString(day = remindDay.value, month = remindMonth.value, year = remindYear.value, hour = remindHour.value, min = remindMin.value, timeSystem = timeSystem.value)
-
     val createTime = rememberSaveable { mutableStateOf(reminder.creationTime) }
     val reminderMessage = rememberSaveable { mutableStateOf(reminder.reminderMessage) }
     val sendNotification = rememberSaveable { mutableStateOf(reminder.sendNotification)}
@@ -268,37 +266,59 @@ fun EditReminder (
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
-                        if ((title.value != reminder.reminderTitle)
-                            || (getCategoryId(viewState.categories, category.value) != reminder.reminderCategoryId)
-                            || newRemindTime != reminder.reminderTime
-                            || reminderMessage.value != reminder.reminderMessage
-                            || sendNotification.value != reminder.sendNotification
-                            || latlng != null
-                        ) {
-                            val editedReminder = Reminder(
-                                reminderId = reminder.reminderId,
-                                reminderTitle = title.value,
-                                reminderCategoryId = getCategoryId(
+                        var newRemindTime = "December 30, 3023 12:00 PM"
+                        if (remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
+                            newRemindTime = dateToString(
+                                day = remindDay.value,
+                                month = remindMonth.value,
+                                year = remindYear.value,
+                                hour = remindHour.value,
+                                min = remindMin.value,
+                                timeSystem = timeSystem.value
+                            )
+                        }
+                        if (title.value != "" && category.value.isNotEmpty()) {
+                            if ((title.value != reminder.reminderTitle)
+                                || (getCategoryId(
                                     viewState.categories,
                                     category.value
-                                ),
-                                creatorId = user.id,
-                                locationX = latlng?.latitude?: reminder.locationX,
-                                locationY = latlng?.longitude?: reminder.locationY,
-                                reminderTime = newRemindTime,
-                                creationTime = reminder.creationTime,
-                                reminderMessage = reminderMessage.value,
-                                sendNotification = sendNotification.value
-                            )
-                            coroutineScope.launch {
-                                viewModel.editReminder(
-                                    editedReminder
+                                ) != reminder.reminderCategoryId)
+                                || newRemindTime != reminder.reminderTime
+                                || reminderMessage.value != reminder.reminderMessage
+                                || sendNotification.value != reminder.sendNotification
+                                || latlng != null
+                            ) {
+                                val editedReminder = Reminder(
+                                    reminderId = reminder.reminderId,
+                                    reminderTitle = title.value,
+                                    reminderCategoryId = getCategoryId(
+                                        viewState.categories,
+                                        category.value
+                                    ),
+                                    creatorId = user.id,
+                                    locationX = latlng?.latitude ?: reminder.locationX,
+                                    locationY = latlng?.longitude ?: reminder.locationY,
+                                    reminderTime = newRemindTime,
+                                    creationTime = reminder.creationTime,
+                                    reminderMessage = reminderMessage.value,
+                                    sendNotification = sendNotification.value
                                 )
-                                setReminder(editedReminder)
+                                coroutineScope.launch {
+                                    viewModel.editReminder(
+                                        editedReminder
+                                    )
+                                    setReminder(editedReminder)
+                                }
+                                onBackPress()
+                            } else {
+                                Toast.makeText(
+                                    Graph.appContext,
+                                    "Please modify some value or press Back button if you do not want to change.",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
-                            onBackPress()
                         } else {
-                            Toast.makeText(Graph.appContext, "Please modify some value or press Back button if you do not want to change.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(Graph.appContext, "Please enter at least the title and category to save the change.", Toast.LENGTH_LONG).show()
                         }
                     },
                     enabled = true,

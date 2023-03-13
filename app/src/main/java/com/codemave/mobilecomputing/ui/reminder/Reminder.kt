@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.location.Location
+import android.location.LocationManager
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -269,8 +271,8 @@ fun Reminder (
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
-                        if (title.value != "" && category.value.isNotEmpty() && remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
-                        //if (title.value != "" && category.value.isNotEmpty()) {
+                        //if (title.value != "" && category.value.isNotEmpty() && remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
+                        if (title.value != "" && category.value.isNotEmpty()) {
                             coroutineScope.launch {
                                 if (Build.VERSION.SDK_INT >= 33) {
                                     requestPermission(
@@ -279,25 +281,27 @@ fun Reminder (
                                         requestPermission = {launcher.launch (Manifest.permission.ACCESS_NOTIFICATION_POLICY)}
                                     )
                                 }
+                                var reminderTime: String = "December 30, 3023 12:00 PM"
+                                if (remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
+                                    reminderTime = dateToString(remindDay.value, remindMonth.value, remindYear.value, remindHour.value, remindMin.value, timeSystem.value)
+                                }
                                 val reminder = Reminder(
                                         reminderTitle = title.value,
                                         reminderCategoryId = getCategoryId(viewState.categories, category.value),
                                         creatorId = getCreatorId(viewStateSignUp.accounts, creator.value),
-                                        locationX = latlng?.latitude?:65.06,
-                                        locationY = latlng?.longitude?:25.47,
-                                        reminderTime = dateToString(remindDay.value, remindMonth.value, remindYear.value, remindHour.value, remindMin.value, timeSystem.value),
+                                        locationX = latlng?.latitude?:90.0,
+                                        locationY = latlng?.longitude?:0.0,
+                                        reminderTime = reminderTime,
                                         creationTime = getCurrentTime(),//currentTimeInMillis.toDateTimeString(),
                                         reminderMessage = reminderMessage.value,
                                         sendNotification = sendNotification.value
                                     )
-                                viewModel.saveReminder(
-                                    reminder
-                                )
                                 reminderIsNear(reminder)
+                                viewModel.saveReminder(reminder)
                             }
                             onBackPress()
                         } else {
-                            Toast.makeText(Graph.appContext, "Please enter all of the value to save the reminder", Toast.LENGTH_LONG).show()
+                            Toast.makeText(Graph.appContext, "Please enter at least the title and category to save the reminder", Toast.LENGTH_LONG).show()
                         }
                     },
                     enabled = true,
@@ -585,18 +589,19 @@ fun requestPermission(
     }
 }
 
-fun reminderIsNear(reminder: Reminder) {
-    var userLocation: Location = Location("")
-    var fusedLocationClient = LocationServices.getFusedLocationProviderClient(Graph.appContext)
-    fusedLocationClient.lastLocation
-        .addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                userLocation = location
-            }
-        }
-    var reminderLocation = LatLng(reminder.locationX, reminder.locationY)
-    var userLocationInLatLng = LatLng(userLocation.latitude, userLocation.longitude)
-    if (isLocationNear(reminderLocation, userLocationInLatLng)) {
+fun reminderIsNear(
+    reminder: Reminder
+) {
+    val reminderLocation = LatLng(reminder.locationX, reminder.locationY)
+    if (isLocationNear(reminderLocation, getUserLocation())) {
         reminderIsNearNotification(reminder)
     }
+}
+
+var location: LatLng = LatLng(65.06, 25.47)
+fun setUserLocation(alocation: LatLng) {
+    location = alocation
+}
+fun getUserLocation(): LatLng {
+    return location
 }

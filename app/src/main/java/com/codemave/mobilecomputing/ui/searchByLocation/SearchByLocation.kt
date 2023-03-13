@@ -1,6 +1,7 @@
 package com.codemave.mobilecomputing.ui.searchByLocation
 
 import android.location.Location
+import android.location.Location.distanceBetween
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -12,11 +13,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.codemave.mobilecomputing.Graph
 import com.codemave.mobilecomputing.data.entity.Reminder
+import com.codemave.mobilecomputing.ui.reminder.getUserLocation
 import com.codemave.mobilecomputing.util.rememberMapViewWithLifecycle
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
@@ -36,13 +39,19 @@ fun SearchByLocation(navController: NavController) {
             val map = mapView.awaitMap()
             map.uiSettings.isZoomControlsEnabled = true
             map.uiSettings.isScrollGesturesEnabled = true
-            val location = LatLng(65.06, 25.47)
+            val location = LatLng(getUserLocation().latitude, getUserLocation().longitude)
             map.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(location.latitude, location.longitude),
                     10f
                 )
             )
+            val blueMarkerIcon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+            val markerOptions = MarkerOptions()
+                .title ("Welcome to the University of Oulu!")
+                .position(location)
+                .icon(blueMarkerIcon)
+            map.addMarker(markerOptions)
             setMapLongClick(map, navController, reminders = viewState.reminders)
         }
     }
@@ -91,15 +100,9 @@ fun isLocationNear(
     reminderPoint: LatLng,
     choosePoint: LatLng
 ): Boolean {
-    val searchLocation = Location("").apply {
-        choosePoint.latitude
-        choosePoint.longitude
-    }
-    val reminderLocation = Location("").apply {
-        reminderPoint.latitude
-        reminderPoint.longitude
-    }
-    val distanceToReminder = searchLocation.distanceTo(reminderLocation)
+    val results = floatArrayOf(0f)
+    distanceBetween(choosePoint.latitude, choosePoint.longitude, reminderPoint.latitude, reminderPoint.longitude, results)
+    val distanceToReminder = results[0]
     return distanceToReminder < 1000
 }
 
@@ -108,6 +111,7 @@ private fun setMapLongClick (
     navController: NavController,
     reminders: List<Reminder>
 ) {
+    val greenMarkerIcon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
     map.setOnMapLongClickListener { latlng ->
         val snippet = String.format(
             Locale.getDefault(),
@@ -116,7 +120,7 @@ private fun setMapLongClick (
             latlng.longitude
         )
         map.addMarker(
-            MarkerOptions().position(latlng).title("Search Location").snippet(snippet)
+            MarkerOptions().position(latlng).title("Search Location").snippet(snippet).icon(greenMarkerIcon)
         ).apply {
             navController.currentBackStackEntry
                 ?.savedStateHandle
