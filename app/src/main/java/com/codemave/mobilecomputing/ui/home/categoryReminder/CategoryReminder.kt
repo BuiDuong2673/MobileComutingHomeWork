@@ -31,7 +31,6 @@ import com.codemave.mobilecomputing.util.viewModelProviderFactoryOf
 import com.codemave.mobilecomputing.R
 import com.codemave.mobilecomputing.data.room.ReminderToCategory
 import com.codemave.mobilecomputing.ui.reminder.isPrevious
-import com.codemave.mobilecomputing.ui.reminder.reminderIsNearNotification
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
@@ -124,36 +123,6 @@ private fun ReminderListAll(
                 modifier = Modifier.fillParentMaxWidth(),
                 navController = navController
             )
-            sendLocationNotification(item.reminder)
-        }
-    }
-}
-
-/**
- * send notification when user's location is near the reminder's location
- */
-fun sendLocationNotification(reminder: Reminder) {
-    var userLocation = Location ("").apply {
-        latitude = 65.06
-        longitude = 25.47
-    }
-    var fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(Graph.appContext)
-    fusedLocationClient.lastLocation
-        .addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                userLocation = location
-            }
-        }
-    var result: Float?
-
-    val reminderLocation = Location("").apply {
-        latitude = reminder.locationX
-        longitude = reminder.locationY
-    }
-    result = userLocation.distanceTo(reminderLocation)
-    if (result != null) {
-        if (result < 1000) {
-            reminderIsNearNotification(reminder)
         }
     }
 }

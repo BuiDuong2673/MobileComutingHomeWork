@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.location.Location
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,7 +43,9 @@ import com.codemave.mobilecomputing.data.entity.Category
 import kotlinx.coroutines.launch
 import java.util.*
 import com.codemave.mobilecomputing.data.entity.Reminder
+import com.codemave.mobilecomputing.ui.searchByLocation.isLocationNear
 import com.codemave.mobilecomputing.ui.theme.Green
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
@@ -267,6 +270,7 @@ fun Reminder (
                 Button(
                     onClick = {
                         if (title.value != "" && category.value.isNotEmpty() && remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
+                        //if (title.value != "" && category.value.isNotEmpty()) {
                             coroutineScope.launch {
                                 if (Build.VERSION.SDK_INT >= 33) {
                                     requestPermission(
@@ -275,8 +279,7 @@ fun Reminder (
                                         requestPermission = {launcher.launch (Manifest.permission.ACCESS_NOTIFICATION_POLICY)}
                                     )
                                 }
-                                viewModel.saveReminder(
-                                    Reminder(
+                                val reminder = Reminder(
                                         reminderTitle = title.value,
                                         reminderCategoryId = getCategoryId(viewState.categories, category.value),
                                         creatorId = getCreatorId(viewStateSignUp.accounts, creator.value),
@@ -287,7 +290,10 @@ fun Reminder (
                                         reminderMessage = reminderMessage.value,
                                         sendNotification = sendNotification.value
                                     )
+                                viewModel.saveReminder(
+                                    reminder
                                 )
+                                reminderIsNear(reminder)
                             }
                             onBackPress()
                         } else {
@@ -576,5 +582,21 @@ fun requestPermission(
 ) {
     if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
         requestPermission()
+    }
+}
+
+fun reminderIsNear(reminder: Reminder) {
+    var userLocation: Location = Location("")
+    var fusedLocationClient = LocationServices.getFusedLocationProviderClient(Graph.appContext)
+    fusedLocationClient.lastLocation
+        .addOnSuccessListener { location: Location? ->
+            if (location != null) {
+                userLocation = location
+            }
+        }
+    var reminderLocation = LatLng(reminder.locationX, reminder.locationY)
+    var userLocationInLatLng = LatLng(userLocation.latitude, userLocation.longitude)
+    if (isLocationNear(reminderLocation, userLocationInLatLng)) {
+        reminderIsNearNotification(reminder)
     }
 }

@@ -7,7 +7,6 @@ import com.codemave.mobilecomputing.Graph
 import com.codemave.mobilecomputing.data.entity.Reminder
 import com.codemave.mobilecomputing.data.repository.ReminderRepository
 import com.codemave.mobilecomputing.data.room.ReminderToCategory
-import com.codemave.mobilecomputing.ui.reminder.reminderIsNearNotification
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow

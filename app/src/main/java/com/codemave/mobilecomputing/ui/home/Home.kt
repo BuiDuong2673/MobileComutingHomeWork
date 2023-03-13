@@ -105,7 +105,9 @@ private fun HomeAppBar(
         },
         backgroundColor = backgroundColor,
         actions = {
-            IconButton(onClick = {}) {
+            IconButton(
+                onClick = {navController.navigate("searchByLocation")}
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = stringResource(R.string.search)

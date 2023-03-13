@@ -12,6 +12,7 @@ import com.codemave.mobilecomputing.ui.login.LogIn
 import com.codemave.mobilecomputing.ui.map.ReminderLocationMap
 import com.codemave.mobilecomputing.ui.profile.Profile
 import com.codemave.mobilecomputing.ui.reminder.Reminder
+import com.codemave.mobilecomputing.ui.searchByLocation.SearchByLocation
 import com.codemave.mobilecomputing.ui.signup.SignUp
 
 @Composable
@@ -50,6 +51,10 @@ fun PhoneBossApp (
 
         composable(route = "map") {
             ReminderLocationMap(navController = appState.navController)
+        }
+        
+        composable (route = "searchByLocation") {
+            SearchByLocation(navController = appState.navController)
         }
     }
 }
