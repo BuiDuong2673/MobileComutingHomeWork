@@ -60,22 +60,11 @@ class ReminderViewModel (
 
     suspend fun editReminder(reminder: Reminder) {
         createEditReminderNotification(reminder)
-        //updateUserLocation(reminder)
         if (reminder.sendNotification) {
             setReminderTimeNotification(reminder)
         }
         reminderRepository.editReminder(reminder)
     }
-
-    /*fun updateUserLocation(reminder: Reminder) {
-        var fusedLocationClient = LocationServices.getFusedLocationProviderClient(Graph.appContext)
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    reminderIsNear(reminder, location)
-                }
-            }
-    }*/
 
     init {
         viewModelScope.launch {
@@ -270,10 +259,14 @@ private fun setRecurringReminder() {
  */
 fun reminderIsNearNotification(reminder: Reminder) {
     val notificationId = 7
+    val intentToast = Intent("trigger_toast")
+    val pendingIntent = PendingIntent.getBroadcast(Graph.appContext, 0, intentToast, PendingIntent.FLAG_MUTABLE)
     val builder = NotificationCompat.Builder(Graph.appContext, "CHANNEL_ID")
-        .setSmallIcon(R.drawable.ic_success_noti)
+        .setSmallIcon(R.drawable.ic_location_noti)
+        .setColor(ContextCompat.getColor(Graph.appContext, R.color.orange_lighter))
         .setContentTitle("You are near the reminder location")
         .setContentText("You are currently near to the reminder ${reminder.reminderTitle}'s location.")
+        .setContentIntent(pendingIntent)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
     with (NotificationManagerCompat.from(Graph.appContext)) {
         notify (notificationId, builder.build())

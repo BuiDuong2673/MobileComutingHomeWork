@@ -281,7 +281,7 @@ fun Reminder (
                                         requestPermission = {launcher.launch (Manifest.permission.ACCESS_NOTIFICATION_POLICY)}
                                     )
                                 }
-                                var reminderTime: String = "December 30, 3023 12:00 PM"
+                                var reminderTime = "December 30, 3023 12:00 PM"
                                 if (remindDay.value != "" && remindMonth.value != "" && remindYear.value != "" && remindHour.value != "" && remindMin.value != "" && timeSystem.value != "") {
                                     reminderTime = dateToString(remindDay.value, remindMonth.value, remindYear.value, remindHour.value, remindMin.value, timeSystem.value)
                                 }
